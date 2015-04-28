@@ -1,8 +1,8 @@
 ﻿/* http://keith-wood.name/datepick.html
    Date picker for jQuery v4.1.0.
    Written by Keith Wood (kbwood{at}iinet.com.au) February 2010.
-   Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and 
-   MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses. 
+   Dual licensed under the GPL (http://dev.jquery.com/browser/trunk/jquery/GPL-LICENSE.txt) and
+   MIT (http://dev.jquery.com/browser/trunk/jquery/MIT-LICENSE.txt) licenses.
    Please attribute the author if you use it. */
 
 (function($) { // Hide scope, no $ conflict
@@ -22,6 +22,7 @@ function Datepicker() {
 			// 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
 		fixedWeeks: false, // True to always show 6 weeks, false to only show as many as are needed
 		firstDay: 0, // First day of the week, 0 = Sunday, 1 = Monday, ...
+    firstDayOfMonth: 1,
 		calculateWeek: this.iso8601Week, // Calculate week of the year from a date, null for ISO8601
 		monthsToShow: 1, // How many months to show, cols or [rows, cols]
 		monthsOffset: 0, // How many months to offset the primary month by;
@@ -110,7 +111,7 @@ $.extend(Datepicker.prototype, {
 	_curMonthClass: 'datepick-month-', // Marker for current month/year
 	_anyYearClass: 'datepick-any-year', // Marker for year direct input
 	_curDoWClass: 'datepick-dow-', // Marker for day of week
-	
+
 	commands: { // Command actions that may be added to a layout by name
 		// name: { // The command name, use '{button:name}' or '{link:name}' in layouts
 		//		text: '', // The field in the regional settings for the displayed text
@@ -1127,8 +1128,16 @@ $.extend(Datepicker.prototype, {
 				if ($.isFunction(inst.options.onChangeMonthYear) && (!inst.prevDate ||
 						inst.prevDate.getFullYear() != inst.drawDate.getFullYear() ||
 						inst.prevDate.getMonth() != inst.drawDate.getMonth())) {
-					inst.options.onChangeMonthYear.apply(target[0],
-						[inst.drawDate.getFullYear(), inst.drawDate.getMonth() + 1]);
+          var yearMonthArray = [];
+          if ($.isFunction(inst.options.determineMonth)) {
+            yearMonthArray = inst.options.determineMonth(inst.drawDate);
+          }
+          if (yearMonthArray instanceof Array && yearMonthArray.length === 2) {
+            inst.options.onChangeMonthYear.apply(target[0], yearMonthArray);
+          } else {
+            inst.options.onChangeMonthYear.apply(target[0],
+              [inst.drawDate.getFullYear(), inst.drawDate.getMonth() + 1]);
+          }
 				}
 			}
 			if (inst.inline) {
@@ -1439,8 +1448,9 @@ $.extend(Datepicker.prototype, {
 			delta = (delta < 0 ? -1 : +1);
 			plugin._changeMonthPlugin(target,
 				-inst.options[event.ctrlKey ? 'monthsToJump' : 'monthsToStep'] * delta);
+      event.preventDefault();
 		}
-		event.preventDefault();
+
 	},
 
 	/* Clear an input and close a popup datepicker.
@@ -1576,16 +1586,19 @@ $.extend(Datepicker.prototype, {
 	   @param  month   (number) the month to show (1-12) (optional)
 	   @param  day     (number) the day to show (optional) */
 	_showMonthPlugin: function(target, year, month, day) {
-		var inst = $.data(target, this.propertyName);
-		if (inst && (day != null ||
-				(inst.drawDate.getFullYear() != year || inst.drawDate.getMonth() + 1 != month))) {
-			inst.prevDate = plugin.newDate(inst.drawDate);
-			var show = this._checkMinMax((year != null ?
-				plugin.newDate(year, month, 1) : plugin.today()), inst);
-			inst.drawDate = plugin.newDate(show.getFullYear(), show.getMonth() + 1, 
-				(day != null ? day : Math.min(inst.drawDate.getDate(),
-				plugin.daysInMonth(show.getFullYear(), show.getMonth() + 1))));
-			this._update(target);
+    var inst = $.data(target, this.propertyName);
+    if (inst && (day != null || (inst.drawDate.getFullYear() != year || inst.drawDate.getMonth() + 1 != month))) {
+      inst.prevDate = plugin.newDate(inst.drawDate);
+      var show = this._checkMinMax((year != null ? plugin.newDate(year, month, 1) : plugin.today()), inst);
+      // Ecommera Fix, ICL-9406, ICL-10775 Fix for select box month selection
+      if (day) {
+        day = Math.abs(inst.drawDate.getDay() - day);
+      }
+      inst.drawDate = plugin.newDate(show.getFullYear(), show.getMonth() + 1,
+        (day ? day : Math.min(1, plugin.daysInMonth(show.getFullYear(), show.getMonth() + 1)))
+      );
+
+      this._update(target);
 		}
 	},
 
@@ -1596,7 +1609,13 @@ $.extend(Datepicker.prototype, {
 		var inst = $.data(target, this.propertyName);
 		if (inst) {
 			var date = plugin.add(plugin.newDate(inst.drawDate), offset, 'm');
-			this._showMonthPlugin(target, date.getFullYear(), date.getMonth() + 1);
+      // If we have 5 weeks, navigating back is not working, because month is longer than default back period 1month,
+      // so we should pass the firstDayOfmonth, when calculating the offset
+      if (inst.options.firstDayOfMonth > 1) {
+			  this._showMonthPlugin(target, date.getFullYear(), date.getMonth() + 1, inst.options.firstDayOfMonth - 1);
+      } else {
+        this._showMonthPlugin(target, date.getFullYear(), date.getMonth() + 1);
+      }
 		}
 	},
 
@@ -1815,15 +1834,25 @@ $.extend(Datepicker.prototype, {
 		monthsToShow = ($.isArray(monthsToShow) ? monthsToShow : [1, monthsToShow]);
 		var fixedWeeks = inst.options.fixedWeeks || (monthsToShow[0] * monthsToShow[1] > 1);
 		var firstDay = inst.options.firstDay;
-		var leadDays = (plugin.newDate(year, month, 1).getDay() - firstDay + 7) % 7;
+		var firstDayOfMonth = inst.options.firstDayOfMonth;
+		var leadDays = (plugin.newDate(year, month, firstDayOfMonth).getDay() - firstDay + 7) % 7;
 		var numWeeks = (fixedWeeks ? 6 : Math.ceil((leadDays + daysInMonth) / 7));
 		var selectOtherMonths = inst.options.selectOtherMonths && inst.options.showOtherMonths;
 		var minDate = (inst.pickingRange ? inst.selectedDates[0] : inst.get('minDate'));
 		var maxDate = inst.get('maxDate');
 		var showWeeks = renderer.week.indexOf('{weekOfYear}') > -1;
 		var today = plugin.today();
-		var drawDate = plugin.newDate(year, month, 1);
+		var drawDate = plugin.newDate(year, month, firstDayOfMonth);
 		plugin.add(drawDate, -leadDays - (fixedWeeks && (drawDate.getDay() == firstDay) ? 7 : 0), 'd');
+        if ($.isFunction(inst.options.generateMonthFn)) {
+        var dates = inst.options.generateMonthFn(target, inst, year, month, renderer, first),
+          startDate = dates[0],
+          endDate = dates[1];
+          numWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 3600 * 1000 * 7));
+          if (startDate instanceof Date) {
+            drawDate = plugin.newDate(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate());
+          }
+        }
 		var ts = drawDate.getTime();
 		// Generate weeks
 		var weeks = '';
@@ -1832,6 +1861,9 @@ $.extend(Datepicker.prototype, {
 				($.isFunction(inst.options.calculateWeek) ? inst.options.calculateWeek(drawDate) : 0) + '</span>');
 			var days = '';
 			for (var day = 0; day < 7; day++) {
+        if (endDate && ts > endDate.getTime() + (24 * 3600 * 1000)) { //datepick is using 12:00 o'clock for dates
+          break;
+        }
 				var selected = false;
 				if (inst.options.rangeSelect && inst.selectedDates.length > 0) {
 					selected = (drawDate.getTime() >= inst.selectedDates[0] &&

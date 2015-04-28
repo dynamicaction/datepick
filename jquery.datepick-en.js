@@ -1,8 +1,8 @@
 ﻿/* http://keith-wood.name/datepick.html
-   English/New Zealand localisation for jQuery Datepicker.
-   Based on en-GB. */
+   English UK localisation for jQuery Datepicker.
+   Written by Stuart. */
 (function($) {
-	$.datepick.regional['en-NZ'] = {
+	$.datepick.regional['en-US'] = {
 		monthNames: ['January','February','March','April','May','June',
 		'July','August','September','October','November','December'],
 		monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -25,5 +25,5 @@
 		dayStatus: 'Select DD, M d', defaultStatus: 'Select a date',
 		isRTL: false
 	};
-	$.datepick.setDefaults($.datepick.regional['en-NZ']);
+	$.datepick.setDefaults($.datepick.regional['en-US']);
 })(jQuery);
