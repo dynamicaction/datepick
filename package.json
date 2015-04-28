@@ -1,0 +1,9 @@
+{
+  "name": "jQuery-Datepick",
+  "version": "5.0.0",
+  "readme": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dynamicaction/datepick"
+  }
+}

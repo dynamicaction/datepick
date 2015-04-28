@@ -31,6 +31,7 @@
 			'{button:name}' to insert a button trigger for command name,
 			'{popup:start}...{popup:end}' to mark a section for inclusion in a popup datepicker only,
 			'{inline:start}...{inline:end}' to mark a section for inclusion in an inline datepicker only.
+    firstDayOfMonth: 1,
 			@property picker {string} Overall structure: '{months}' to insert calendar months.
 			@property monthRow {string} One row of months: '{months}' to insert calendar months.
 			@property month {string} A single month: '{monthHeader<em>:dateFormat</em>}' to insert the month header -
@@ -82,7 +83,7 @@
 			commandLinkClass: '',
 			disabledClass: 'datepick-disabled'
 		},
-	
+
 		/** Command actions that may be added to a layout by name.
 			<ul>
 			<li>prev - Show the previous month (based on <code>monthsToStep</code> option) - <em>PageUp</em></li>
@@ -1310,8 +1311,16 @@
 					if ($.isFunction(inst.options.onChangeMonthYear) && (!inst.prevDate ||
 							inst.prevDate.getFullYear() !== inst.drawDate.getFullYear() ||
 							inst.prevDate.getMonth() !== inst.drawDate.getMonth())) {
+          var yearMonthArray = [];
+          if ($.isFunction(inst.options.determineMonth)) {
+            yearMonthArray = inst.options.determineMonth(inst.drawDate);
+          }
+          if (yearMonthArray instanceof Array && yearMonthArray.length === 2) {
+            inst.options.onChangeMonthYear.apply(target[0], yearMonthArray);
+          } else {
 						inst.options.onChangeMonthYear.apply(elem[0],
-							[inst.drawDate.getFullYear(), inst.drawDate.getMonth() + 1]);
+						[inst.drawDate.getFullYear(), inst.drawDate.getMonth() + 1]);
+          }
 					}
 				}
 				if (inst.inline) {
@@ -1630,8 +1639,9 @@
 			if (inst.options.useMouseWheel) {
 				delta = (delta < 0 ? -1 : +1);
 				plugin.changeMonth(elem, -inst.options[event.ctrlKey ? 'monthsToJump' : 'monthsToStep'] * delta);
+      event.preventDefault();
 			}
-			event.preventDefault();
+
 		},
 
 		/** Clear an input and close a popup datepicker.
@@ -1777,14 +1787,18 @@
 			@example $(selector).datepick('showMonth', 2014, 12, 25) */
 		showMonth: function(elem, year, month, day) {
 			var inst = this._getInst(elem);
-			if (!$.isEmptyObject(inst) && (day != null ||
-					(inst.drawDate.getFullYear() !== year || inst.drawDate.getMonth() + 1 !== month))) {
-				inst.prevDate = plugin.newDate(inst.drawDate);
-				var show = this._checkMinMax((year != null ?
-					plugin.newDate(year, month, 1) : plugin.today()), inst);
-				inst.drawDate = plugin.newDate(show.getFullYear(), show.getMonth() + 1, 
-					(day != null ? day : Math.min(inst.drawDate.getDate(),
-					plugin.daysInMonth(show.getFullYear(), show.getMonth() + 1))));
+		if (inst && (day != null ||
+				(inst.drawDate.getFullYear() != year || inst.drawDate.getMonth() + 1 != month))) {
+			inst.prevDate = plugin.newDate(inst.drawDate);
+      var show = this._checkMinMax((year != null ? plugin.newDate(year, month, 1) : plugin.today()), inst);
+      // Ecommera Fix, ICL-9406, ICL-10775 Fix for select box month selection
+      if (day) {
+        day = Math.abs(inst.drawDate.getDay() - day);
+      }
+			inst.drawDate = plugin.newDate(show.getFullYear(), show.getMonth() + 1, 
+        (day ? day : Math.min(1, plugin.daysInMonth(show.getFullYear(), show.getMonth() + 1)))
+      );
+
 				this._update(elem);
 			}
 		},
@@ -1797,7 +1811,13 @@
 			var inst = this._getInst(elem);
 			if (!$.isEmptyObject(inst)) {
 				var date = plugin.add(plugin.newDate(inst.drawDate), offset, 'm');
+      // If we have 5 weeks, navigating back is not working, because month is longer than default back period 1month,
+      // so we should pass the firstDayOfmonth, when calculating the offset
+      if (inst.options.firstDayOfMonth > 1) {
+			  this._showMonthPlugin(target, date.getFullYear(), date.getMonth() + 1, inst.options.firstDayOfMonth - 1);
+      } else {
 				this.showMonth(elem, date.getFullYear(), date.getMonth() + 1);
+      }
 			}
 		},
 
@@ -2021,15 +2041,25 @@
 			monthsToShow = ($.isArray(monthsToShow) ? monthsToShow : [1, monthsToShow]);
 			var fixedWeeks = inst.options.fixedWeeks || (monthsToShow[0] * monthsToShow[1] > 1);
 			var firstDay = inst.options.firstDay;
-			var leadDays = (plugin.newDate(year, month, 1).getDay() - firstDay + 7) % 7;
+		var firstDayOfMonth = inst.options.firstDayOfMonth;
+		var leadDays = (plugin.newDate(year, month, firstDayOfMonth).getDay() - firstDay + 7) % 7;
 			var numWeeks = (fixedWeeks ? 6 : Math.ceil((leadDays + daysInMonth) / 7));
 			var selectOtherMonths = inst.options.selectOtherMonths && inst.options.showOtherMonths;
 			var minDate = (inst.pickingRange ? inst.selectedDates[0] : inst.get('minDate'));
 			var maxDate = inst.get('maxDate');
 			var showWeeks = renderer.week.indexOf('{weekOfYear}') > -1;
 			var today = plugin.today();
-			var drawDate = plugin.newDate(year, month, 1);
+		var drawDate = plugin.newDate(year, month, firstDayOfMonth);
 			plugin.add(drawDate, -leadDays - (fixedWeeks && (drawDate.getDay() === firstDay) ? 7 : 0), 'd');
+        if ($.isFunction(inst.options.generateMonthFn)) {
+        var dates = inst.options.generateMonthFn(target, inst, year, month, renderer, first),
+          startDate = dates[0],
+          endDate = dates[1];
+          numWeeks = Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 3600 * 1000 * 7));
+          if (startDate instanceof Date) {
+            drawDate = plugin.newDate(startDate.getFullYear(), startDate.getMonth() + 1, startDate.getDate());
+          }
+        }
 			var ts = drawDate.getTime();
 			// Generate weeks
 			var weeks = '';
@@ -2038,6 +2068,9 @@
 					($.isFunction(inst.options.calculateWeek) ? inst.options.calculateWeek(drawDate) : 0) + '</span>');
 				var days = '';
 				for (var day = 0; day < 7; day++) {
+        if (endDate && ts > endDate.getTime() + (24 * 3600 * 1000)) { //datepick is using 12:00 o'clock for dates
+          break;
+        }
 					var selected = false;
 					if (inst.options.rangeSelect && inst.selectedDates.length > 0) {
 						selected = (drawDate.getTime() >= inst.selectedDates[0] &&

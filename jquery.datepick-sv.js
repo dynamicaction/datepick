@@ -22,7 +22,7 @@
 		closeText: 'Stäng', closeStatus: '',
 		yearStatus: '', monthStatus: '',
 		weekText: 'Ve', weekStatus: '',
-		dayStatus: 'D, M d', defaultStatus: '',
+		dayStatus: 'D, M d', defauktStatus: '',
 		isRTL: false
 	};
     $.datepick.setDefaults($.datepick.regionalOptions['sv']);
