@@ -936,15 +936,15 @@ $.extend(Datepicker.prototype, {
 			return;
 		}
 		var inst = target.data(this.propertyName);
-		if (inst.trigger) {
+		if (inst && inst.trigger) {
 			inst.trigger.remove();
 		}
 		target.removeClass(this.markerClassName).removeData(this.propertyName).
 			empty().unbind('.' + this.propertyName);
-		if (inst.inline && $.fn.mousewheel) {
+		if (inst && inst.inline && $.fn.mousewheel) {
 			target.unmousewheel();
 		}
-		if (!inst.inline && inst.options.autoSize) {
+		if (inst && !inst.inline && inst.options.autoSize) {
 			target.removeAttr('size');
 		}
 	},
