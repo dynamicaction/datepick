@@ -9,7 +9,7 @@
 		'Xxx', 'Xxx', 'Xxx', 'Xxx', 'Xxx', 'Xxx'],
 		dayNames: ['Xxxxxx', 'Xxxxxx', 'Xxxxxxx', 'Xxxxxxxxx', 'Xxxxxxxx', 'Xxxxxx', 'Xxxxxxxx'],
 		dayNamesShort: ['Xxx', 'Xxx', 'Xxx', 'Xxx', 'Xxx', 'Xxx', 'Xxx'],
-		dayNamesMin: ['Xx','Xx','Xx','Xx','Xx','Xx','Xx'],
+		dayNamesMin: ['X','X','X','X','X','X','X'],
 		dateFormat: 'dd/mm/yyyy', firstDay: 1,
 		renderer: $.datepick.defaultRenderer,
 		prevText: 'Xxxx', prevStatus: 'Xxxx xxx xxxxxxxx xxxxx',
