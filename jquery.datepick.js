@@ -1698,7 +1698,7 @@ $.extend(Datepicker.prototype, {
 	/* Get current visible months.
 	   @param  target  (element) the control to affect
 	   @param  inst    (object) the current instance settings
-	   @return  (Object) current visible months */
+	   @return  (Array) current visible months */
 	   getVisibleMonths: function(target, inst) {
 		var monthNames = inst.options.monthNames,
 			calendarHeader,
@@ -1707,7 +1707,7 @@ $.extend(Datepicker.prototype, {
 		$(target).find('.datepick-month-header').each(function() {
 			calendarHeader = $(this).text().split(' ');
 
-			if (monthNames.includes(calendarHeader[0])) {
+			if (monthNames.indexOf(calendarHeader[0]) > -1) {
 				visibleMonths.push({
 					'month': monthNames.indexOf(calendarHeader[0]) + 1,
 					'year': calendarHeader[1]
@@ -1731,14 +1731,25 @@ $.extend(Datepicker.prototype, {
 		// Generate months
 		var monthRows = '';
 		var visibleMonths = this.getVisibleMonths(target, inst);
-		var inViewPort = Boolean(visibleMonths.find((data) => data.month === drawDate.getMonth() + 1));
+		var viewPort;
+
+		for (var index = 0; index < visibleMonths.length; index++) {
+			if (visibleMonths[index].month !== drawDate.getMonth() + 1) {
+				continue;
+			}
+
+			viewPort = visibleMonths[index];
+			break;
+		}
+
+		var inViewPort = Boolean(viewPort);
 		var monthToGenerate;
 
 		for (var row = 0; row < monthsToShow[0]; row++) {
 			var months = '';
 			for (var col = 0; col < monthsToShow[1]; col++) {
 				if (inViewPort) {
-					monthToGenerate = visibleMonths[col];
+					monthToGenerate = visibleMonths[col].month;
 				} else {
 					monthToGenerate = drawDate.getMonth() + 1;
 				}
