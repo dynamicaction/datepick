@@ -1695,6 +1695,29 @@ $.extend(Datepicker.prototype, {
 		}
 	},
 
+	/* Get current visible months.
+	   @param  target  (element) the control to affect
+	   @param  inst    (object) the current instance settings
+	   @return  (Object) current visible months */
+	   getVisibleMonths: function(target, inst) {
+		var monthNames = inst.options.monthNames,
+			calendarHeader,
+			visibleMonths = [];
+
+		$(target).find('.datepick-month-header').each(function() {
+			calendarHeader = $(this).text().split(' ');
+
+			if (monthNames.includes(calendarHeader[0])) {
+				visibleMonths.push({
+					'month': monthNames.indexOf(calendarHeader[0]) + 1,
+					'year': calendarHeader[1]
+				});
+			}
+		});
+
+		return visibleMonths;
+	},
+
 	/* Generate the datepicker content for this control.
 	   @param  target  (element) the control to affect
 	   @param  inst    (object) the current instance settings
@@ -1707,11 +1730,21 @@ $.extend(Datepicker.prototype, {
 		var drawDate = plugin._applyMonthsOffset(plugin.newDate(inst.drawDate), inst);
 		// Generate months
 		var monthRows = '';
+		var visibleMonths = this.getVisibleMonths(target, inst);
+		var inViewPort = Boolean(visibleMonths.find((data) => data.month === drawDate.getMonth() + 1));
+		var monthToGenerate;
+
 		for (var row = 0; row < monthsToShow[0]; row++) {
 			var months = '';
 			for (var col = 0; col < monthsToShow[1]; col++) {
+				if (inViewPort) {
+					monthToGenerate = visibleMonths[col];
+				} else {
+					monthToGenerate = drawDate.getMonth() + 1;
+				}
+
 				months += this._generateMonth(target, inst, drawDate.getFullYear(),
-					drawDate.getMonth() + 1, inst.options.renderer, (row == 0 && col == 0));
+					monthToGenerate, inst.options.renderer, (row == 0 && col == 0));
 				plugin.add(drawDate, 1, 'm');
 			}
 			monthRows += this._prepare(inst.options.renderer.monthRow, inst).replace(/\{months\}/, months);
