@@ -1162,8 +1162,9 @@ $.extend(Datepicker.prototype, {
 
 	/* Update the input field and any alternate field with the current dates.
 	   @param  target  (element) the control to use
-	   @param  keyUp   (boolean, internal) true if coming from keyUp processing */
-	_updateInput: function(target, keyUp) {
+		 @param  keyUp   (boolean, internal) true if coming from keyUp processing
+		 @param selectedDate (Date) currently selected date */
+	_updateInput: function(target, keyUp, selectedDate) {
 		var inst = $.data(target, this.propertyName);
 		if (inst) {
 			var value = '';
@@ -1183,7 +1184,7 @@ $.extend(Datepicker.prototype, {
 			$(inst.options.altField).val(altValue);
 			if ($.isFunction(inst.options.onSelect) && !keyUp && !inst.inSelect) {
 				inst.inSelect = true; // Prevent endless loops
-				inst.options.onSelect.apply(target, [inst.selectedDates]);
+				inst.options.onSelect.apply(target, [inst.selectedDates, selectedDate]);
 				inst.inSelect = false;
 			}
 		}
@@ -1684,7 +1685,7 @@ $.extend(Datepicker.prototype, {
 				inst.selectedDates = [date];
 			}
 			inst.prevDate = plugin.newDate(date);
-			this._updateInput(target);
+			this._updateInput(target, null, date);
 			if (inst.inline || inst.pickingRange || inst.selectedDates.length <
 					(inst.options.multiSelect || (inst.options.rangeSelect ? 2 : 1))) {
 				this._update(target);
