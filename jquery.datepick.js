@@ -1119,8 +1119,9 @@ $.extend(Datepicker.prototype, {
 	/* Update the datepicker display.
 	   @param  target  (event) a focus event or
 	                   (element) the control to use
-	   @param  hidden  (boolean) true to initially hide the datepicker */
-	_update: function(target, hidden) {
+	   @param  hidden  (boolean) true to initially hide the datepicker
+	   @param  fromNavigation  (boolean) true when update is triggerd by navigation */
+	_update: function(target, hidden, fromNavigation) {
 		target = $(target.target || target);
 		var inst = target.data(plugin.propertyName);
 		if (inst) {
@@ -1141,7 +1142,7 @@ $.extend(Datepicker.prototype, {
 				}
 			}
 			if (inst.inline) {
-				target.html(this._generateContent(target[0], inst));
+				target.html(this._generateContent(target[0], inst, fromNavigation));
 			}
 			else if (plugin.curInst == inst) {
 				if (!inst.div) {
@@ -1154,7 +1155,7 @@ $.extend(Datepicker.prototype, {
 						inst.div.mousewheel(this._doMouseWheel);
 					}
 				}
-				inst.div.html(this._generateContent(target[0], inst));
+				inst.div.html(this._generateContent(target[0], inst, fromNavigation));
 				target.focus();
 			}
 		}
@@ -1599,7 +1600,7 @@ $.extend(Datepicker.prototype, {
         (day ? day : Math.min(1, plugin.daysInMonth(show.getFullYear(), show.getMonth() + 1)))
       );
 
-      this._update(target);
+      this._update(target, null, true);
 		}
 	},
 
@@ -1722,8 +1723,9 @@ $.extend(Datepicker.prototype, {
 	/* Generate the datepicker content for this control.
 	   @param  target  (element) the control to affect
 	   @param  inst    (object) the current instance settings
+	   @param  fromNavigation  (boolean) true when is triggerd by navigation
 	   @return  (jQuery) the datepicker content */
-	_generateContent: function(target, inst) {
+	_generateContent: function(target, inst, fromNavigation) {
 		var monthsToShow = inst.options.monthsToShow;
 		monthsToShow = ($.isArray(monthsToShow) ? monthsToShow : [1, monthsToShow]);
 		inst.drawDate = this._checkMinMax(
@@ -1749,7 +1751,7 @@ $.extend(Datepicker.prototype, {
 		for (var row = 0; row < monthsToShow[0]; row++) {
 			var months = '';
 			for (var col = 0; col < monthsToShow[1]; col++) {
-				if (inViewPort) {
+				if (inViewPort && !fromNavigation) {
 					monthToGenerate = visibleMonths[col].month;
 				} else {
 					monthToGenerate = drawDate.getMonth() + 1;
