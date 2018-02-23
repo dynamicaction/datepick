@@ -139,10 +139,8 @@ $.extend(Datepicker.prototype, {
 			keystroke: {keyCode: 33, ctrlKey: true}, // Ctrl + Page up
 			enabled: function(inst) {
 				var minDate = inst.curMinDate();
-				return (!minDate || plugin.add(plugin.day(
-					plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate),
-					1 - inst.options.monthsToJump, 'm'), inst), 1), -1, 'd').
-					getTime() >= minDate.getTime()); },
+				var date = plugin.add(plugin.day(plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate),1 - inst.options.monthsToJump, 'm'), inst), 1), -1, 'd');
+				return (!minDate || (date.getFullYear() * 100) + date.getMonth() > (minDate.getFullYear() * 100) + minDate.getMonth()); },
 			date: function(inst) {
 				return plugin.day(plugin._applyMonthsOffset(plugin.add(
 					plugin.newDate(inst.drawDate), -inst.options.monthsToJump, 'm'), inst), 1); },
@@ -153,9 +151,8 @@ $.extend(Datepicker.prototype, {
 			keystroke: {keyCode: 34}, // Page down
 			enabled: function(inst) {
 				var maxDate = inst.get('maxDate');
-				return (!maxDate || plugin.day(plugin._applyMonthsOffset(plugin.add(
-					plugin.newDate(inst.drawDate), inst.options.monthsToStep, 'm'), inst), 1).
-					getTime() <= maxDate.getTime()); },
+				var date = plugin.day(plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate), inst.options.monthsToStep, 'm'), inst), 1);
+				return (!maxDate || (date.getFullYear() * 100) + date.getMonth() < (maxDate.getFullYear() * 100) + maxDate.getMonth()); },
 			date: function(inst) {
 				return plugin.day(plugin._applyMonthsOffset(plugin.add(
 					plugin.newDate(inst.drawDate), inst.options.monthsToStep, 'm'), inst), 1); },
@@ -1759,7 +1756,8 @@ $.extend(Datepicker.prototype, {
 
 				months += this._generateMonth(target, inst, drawDate.getFullYear(),
 					monthToGenerate, inst.options.renderer, (row == 0 && col == 0));
-				plugin.add(drawDate, 1, 'm');
+
+        plugin.add(drawDate, 1, 'm');
 			}
 			monthRows += this._prepare(inst.options.renderer.monthRow, inst).replace(/\{months\}/, months);
 		}
