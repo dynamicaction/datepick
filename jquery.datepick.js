@@ -124,6 +124,9 @@ $.extend(Datepicker.prototype, {
 		prev: {text: 'prevText', status: 'prevStatus', // Previous month
 			keystroke: {keyCode: 33}, // Page up
 			enabled: function(inst) {
+				if (inst.get('arrowsAlwaysVisible')) {
+					return true;
+				}
 				var minDate = inst.curMinDate();
 				return (!minDate || plugin.add(plugin.day(
 					plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate),
@@ -138,6 +141,9 @@ $.extend(Datepicker.prototype, {
 		prevJump: {text: 'prevJumpText', status: 'prevJumpStatus', // Previous year
 			keystroke: {keyCode: 33, ctrlKey: true}, // Ctrl + Page up
 			enabled: function(inst) {
+				if (inst.get('arrowsAlwaysVisible')) {
+					return true;
+				}
 				var minDate = inst.curMinDate();
 				var date = plugin.add(plugin.day(plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate),1 - inst.options.monthsToJump, 'm'), inst), 1), -1, 'd');
 				return (!minDate || (date.getFullYear() * 100) + date.getMonth() > (minDate.getFullYear() * 100) + minDate.getMonth()); },
@@ -150,6 +156,9 @@ $.extend(Datepicker.prototype, {
 		next: {text: 'nextText', status: 'nextStatus', // Next month
 			keystroke: {keyCode: 34}, // Page down
 			enabled: function(inst) {
+				if (inst.get('arrowsAlwaysVisible')) {
+					return true;
+				}
 				var maxDate = inst.get('maxDate');
 				var date = plugin.day(plugin._applyMonthsOffset(plugin.add(plugin.newDate(inst.drawDate), inst.options.monthsToStep, 'm'), inst), 1);
 				return (!maxDate || (date.getFullYear() * 100) + date.getMonth() < (maxDate.getFullYear() * 100) + maxDate.getMonth()); },
@@ -162,6 +171,9 @@ $.extend(Datepicker.prototype, {
 		nextJump: {text: 'nextJumpText', status: 'nextJumpStatus', // Next year
 			keystroke: {keyCode: 34, ctrlKey: true}, // Ctrl + Page down
 			enabled: function(inst) {
+				if (inst.get('arrowsAlwaysVisible')) {
+					return true;
+				}
 				var maxDate = inst.get('maxDate');
 				return (!maxDate || plugin.day(plugin._applyMonthsOffset(plugin.add(
 					plugin.newDate(inst.drawDate), inst.options.monthsToJump, 'm'), inst), 1).
@@ -1607,6 +1619,8 @@ $.extend(Datepicker.prototype, {
 	_changeMonthPlugin: function(target, offset) {
 		var inst = $.data(target, this.propertyName);
 		if (inst) {
+			var visibleMonths = plugin.getVisibleMonths($(inst.target), inst);
+			inst.drawDate = plugin.newDate(visibleMonths[0].year, visibleMonths[0].month, 1);
 			var date = plugin.add(plugin.newDate(inst.drawDate), offset, 'm');
       // If we have 5 weeks, navigating back is not working, because month is longer than default back period 1month,
       // so we should pass the firstDayOfmonth, when calculating the offset
