@@ -1714,16 +1714,31 @@ $.extend(Datepicker.prototype, {
 	   @return  (Array) current visible months */
 	   getVisibleMonths: function(target, inst) {
 		var monthNames = inst.options.monthNames,
-			calendarHeader,
+			calendarMonthHeader,
+			calendarYearHeader,
+			$header, $headerOptions,
+			datePieces,
 			visibleMonths = [];
 
-		$(target).find('.datepick-month-header').each(function() {
-			calendarHeader = $(this).text().split(' ');
+		$('.datepick-month-header').each(function() {
+			$header = $(this);
 
-			if (monthNames.indexOf(calendarHeader[0]) > -1) {
+			if (this.childElementCount > 0) {
+				// This is the Affinities calendar
+				$headerOptions = $header.find('select > option[selected]');
+				calendarMonthHeader = $($headerOptions.get(0)).text();
+				calendarYearHeader = $($headerOptions.get(1)).text();
+			} else {
+				// This is the calendar modal
+				datePieces = $header.text().split(' ');
+				calendarMonthHeader = datePieces[0];
+				calendarYearHeader = datePieces[1];
+			}
+
+			if (monthNames.indexOf(calendarMonthHeader) > -1) {
 				visibleMonths.push({
-					'month': monthNames.indexOf(calendarHeader[0]) + 1,
-					'year': calendarHeader[1]
+					'month': monthNames.indexOf(calendarMonthHeader) + 1,
+					'year': calendarYearHeader
 				});
 			}
 		});
