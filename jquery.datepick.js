@@ -1719,16 +1719,18 @@ $.extend(Datepicker.prototype, {
 			visibleMonths = [];
 
 		$('.datepick-month-header').each(function() {
-			const $header = $(this);
+			var $header = $(this);
 
 			if (this.childElementCount > 0) {
 				// This is the Affinities calendar
-				const $headerOptions = $header.find('select > option[selected]');
+				var $headerOptions = $header.find('select > option[selected]');
 				calendarMonthHeader = $($headerOptions.get(0)).text();
 				calendarYearHeader = $($headerOptions.get(1)).text();
 			} else {
 				// This is the calendar modal
-				[calendarMonthHeader, calendarYearHeader] = $header.text().split(' ');
+				var headerText = $header.text().split(' ');
+				calendarMonthHeader = headerText[0];
+				calendarYearHeader = headerText[1];
 			}
 
 			if (monthNames.indexOf(calendarMonthHeader) > -1) {
