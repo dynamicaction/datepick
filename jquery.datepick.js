@@ -1775,13 +1775,16 @@ $.extend(Datepicker.prototype, {
 		for (var row = 0; row < monthsToShow[0]; row++) {
 			var months = '';
 			for (var col = 0; col < monthsToShow[1]; col++) {
+				let drawDateYear;
 				if (inViewPort && !fromNavigation) {
 					monthToGenerate = visibleMonths[col].month;
+					drawDateYear = Number(visibleMonths[col].year);
 				} else {
 					monthToGenerate = drawDate.getMonth() + 1;
+					drawDateYear = drawDate.getFullYear();
 				}
 
-				months += this._generateMonth(target, inst, drawDate.getFullYear(),
+				months += this._generateMonth(target, inst, drawDateYear,
 					monthToGenerate, inst.options.renderer, (row == 0 && col == 0));
 
         plugin.add(drawDate, 1, 'm');
