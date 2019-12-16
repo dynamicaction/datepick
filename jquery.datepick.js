@@ -1775,7 +1775,7 @@ $.extend(Datepicker.prototype, {
 		for (var row = 0; row < monthsToShow[0]; row++) {
 			var months = '';
 			for (var col = 0; col < monthsToShow[1]; col++) {
-				let drawDateYear;
+				var drawDateYear;
 				if (inViewPort && !fromNavigation) {
 					monthToGenerate = visibleMonths[col].month;
 					drawDateYear = Number(visibleMonths[col].year);
