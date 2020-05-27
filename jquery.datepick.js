@@ -980,8 +980,7 @@ $.extend(Datepicker.prototype, {
 		var inst = target.data(this.propertyName);
 		if (inst.inline) {
 			target.children('.' + this._disableClass).remove().end().
-				find('button,select').removeAttr('disabled').end().
-				find('a').attr('href', 'javascript:void(0)');
+				find('button,select').removeAttr('disabled').end();
 		}
 		else {
 			target.prop('disabled', false);
@@ -1809,7 +1808,7 @@ $.extend(Datepicker.prototype, {
 		for (var name in inst.options.commands) {
 			addCommand('button', 'button type="button"', 'button', name,
 				inst.options.renderer.commandButtonClass);
-			addCommand('link', 'a href="javascript:void(0)"', 'a', name,
+			addCommand('link', 'a', 'a', name,
 				inst.options.renderer.commandLinkClass);
 		}
 		picker = $(picker);
@@ -1954,7 +1953,7 @@ $.extend(Datepicker.prototype, {
 				var selectable = (selectOtherMonths || drawDate.getMonth() + 1 == month) &&
 					this._isSelectable(target, drawDate, dateInfo.selectable, minDate, maxDate);
 				days += this._prepare(renderer.day, inst).replace(/\{day\}/g,
-					(selectable ? '<a href="javascript:void(0)"' : '<span') +
+					(selectable ? '<a' : '<span') +
 					' class="dp' + ts + ' ' + (dateInfo.dateClass || '') +
 					(selected && (selectOtherMonths || drawDate.getMonth() + 1 == month) ?
 					' ' + renderer.selectedClass : '') +

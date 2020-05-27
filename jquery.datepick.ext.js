@@ -76,7 +76,7 @@ $.extend($.datepick, {
 			if (parent.is('.datepick-week') || parent.is('.ui-state-hover')) {
 				return;
 			}
-			$('<a href="javascript:void(0)" class="' + this.className +
+			$('<a class="' + this.className +
 					'" title="Change first day of the week">' + $(this).text() + '</a>').
 				click(function() {
 					var dow = parseInt(this.className.replace(/^.*datepick-dow-(\d+).*$/, '$1'), 10);
@@ -197,7 +197,7 @@ $.extend($.datepick, {
 	selectWeek: function(picker, inst) {
 		var target = $(this);
 		picker.find('td.datepick-week span,td.ui-state-hover span').each(function() {
-			$('<a href="javascript:void(0)" class="' +
+			$('<a class="' +
 					this.className + '" title="Select the entire week">' +
 					$(this).text() + '</a>').
 				click(function() {
@@ -223,7 +223,7 @@ $.extend($.datepick, {
 	selectMonth: function(picker, inst) {
 		var target = $(this);
 		picker.find('th.datepick-week span,th.ui-state-hover span').each(function() {
-			$('<a href="javascript:void(0)" title="Select the entire month">' +
+			$('<a title="Select the entire month">' +
 					$(this).text() + '</a>').
 				click(function() {
 					var date = target.datepick('retrieveDate', $(this).parents('table').
