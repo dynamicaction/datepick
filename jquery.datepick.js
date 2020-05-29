@@ -1966,9 +1966,9 @@ $.extend(Datepicker.prototype, {
 					' ' + renderer.highlightedClass : '') + '"' +
 					(dateInfo.title || (inst.options.dayStatus && selectable) ? ' title="' +
 					(dateInfo.title || plugin.formatDate(
-					inst.options.dayStatus, drawDate, inst.getConfig())) + '"' : '') + '>' +
+					inst.options.dayStatus, drawDate, inst.getConfig())) + '"' : '') + '><label>' +
 					(inst.options.showOtherMonths || (drawDate.getMonth() + 1) == month ?
-					dateInfo.content || drawDate.getDate() : '&nbsp;') +
+					dateInfo.content || drawDate.getDate() : '&nbsp;') + '</label>' +
 					(selectable ? '</a>' : '</span>'));
 				plugin.add(drawDate, 1, 'd');
 				ts = drawDate.getTime();
