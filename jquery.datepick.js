@@ -1968,7 +1968,7 @@ $.extend(Datepicker.prototype, {
 					(dateInfo.title || plugin.formatDate(
 					inst.options.dayStatus, drawDate, inst.getConfig())) + '"' : '') + '><label>' +
 					(inst.options.showOtherMonths || (drawDate.getMonth() + 1) == month ?
-					dateInfo.content || drawDate.getDate() : '&nbsp;') + '</label>' +
+					dateInfo.content || drawDate.getDate() : '') + '</label>' +
 					(selectable ? '</a>' : '</span>'));
 				plugin.add(drawDate, 1, 'd');
 				ts = drawDate.getTime();
